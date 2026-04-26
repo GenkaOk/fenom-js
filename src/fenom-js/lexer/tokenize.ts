@@ -42,7 +42,7 @@ export function tokenize(input: string): Token[] {
 
                     if (depth === 0) {
                         const content = input.slice(pos + 8, i - 9);
-                        tokens.push({ type: 'text', value: content });
+                        tokens.push({ type: 'ignore_block', content });
                         pos = i;
                         matched = true;
                         break;
@@ -82,16 +82,17 @@ export function tokenize(input: string): Token[] {
             const match = substr.match(pattern.regex);
 
             if (match) {
-                const token: Token = {
-                    type: pattern.type,
-                    value: match[0] // ← добавляем оригинальный текст токена
-                };
-
                 if (pattern.type === 'comment') {
+                    tokens.push({ type: 'comment' });
                     pos += match[0].length;
                     matched = true;
                     break;
                 }
+
+                const token: Token = {
+                    type: pattern.type,
+                    value: match[0] // ← добавляем оригинальный текст токена
+                };
 
                 if (pattern.process) {
                     Object.assign(token, pattern.process(match));

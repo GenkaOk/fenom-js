@@ -107,12 +107,24 @@ export const FOREACH_PATTERNS: TokenPattern[] = [
     // 2. {foreach $path.as.array as $item}
     {
         type: 'for',
-        regex: /^\{(for|foreach)\s*\$([^\s}]+?)\s+as\s*\$(\w+)(?:\s*\|\s*reverse)?\s*\}/,
+        regex: /^\{(for|foreach)\s*\$([^\s}]+?)\s+as\s*\$(\w+)(\s*\|\s*reverse)?\s*\}/,
         process: (match) => ({
-            collection: `$${match[2]}`, // ← любой путь: a.b[0].c
+            collection: `$${match[2]}`,
             item: match[3],
             key: null,
-            reverse: match[0].includes('| reverse')
+            reverse: !!match[4]
+        })
+    },
+
+    // 3. {foreach $path as $key => $item}
+    {
+        type: 'for',
+        regex: /^\{(for|foreach)\s*\$([^\s}]+?)\s+as\s*\$(\w+)\s*=>\s*\$(\w+)(\s*\|\s*reverse)?\s*\}/,
+        process: (match) => ({
+            collection: `$${match[2]}`,
+            key: match[3],
+            item: match[4],
+            reverse: !!match[5]
         })
     },
 
@@ -134,7 +146,13 @@ export const FOREACH_PATTERNS: TokenPattern[] = [
         regex: /^\{\/(?:for|foreach)\}/
     },
 
-    // 5. break / continue
+    // 5. foreachelse
+    {
+        type: 'foreachelse',
+        regex: /^\{foreachelse\}/
+    },
+
+    // 6. break / continue
     {
         type: 'break',
         regex: /^\{break\}/i
