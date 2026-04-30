@@ -47,8 +47,11 @@ export function parseFor(tokens: Token[], index: number): { node: ASTNode; nextI
     while (i < tokens.length) {
         const currentToken = tokens[i];
 
-        // Увеличиваем глубину для вложенных блоков
+        // Увеличиваем глубину для вложенных блоков (циклы и условия)
         if (currentToken.type === 'for' || currentToken.type === 'foreach' || currentToken.type === 'for_range') {
+            depth++;
+        }
+        if (currentToken.type === 'if') {
             depth++;
         }
 
@@ -58,6 +61,14 @@ export function parseFor(tokens: Token[], index: number): { node: ASTNode; nextI
                 depth--;
             } else {
                 break; // выходим — нашли конец текущего цикла
+            }
+        }
+        if (currentToken.type === 'endif') {
+            if (depth > 0) {
+                depth--;
+            } else {
+                // Этого не должно происходить в корректном шаблоне
+                // но на всякий случай просто игнорируем
             }
         }
 

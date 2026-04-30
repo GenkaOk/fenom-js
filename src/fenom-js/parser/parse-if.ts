@@ -26,26 +26,29 @@ export function parseIf(tokens: Token[], index: number): { node: any; nextIndex:
     while (i < tokens.length) {
         const token = tokens[i];
 
+        // Увеличиваем глубину для всех вложенных блоков
         if (token.type === 'if') {
             depth++;
         }
-
-        if (token.type === 'endif') {
-            if (depth === 0) {
-                // Завершаем текущий if
-                break;
-            }
-            depth--;
+        if (token.type === 'for' || token.type === 'foreach' || token.type === 'for_range') {
+            depth++;
         }
 
         if (depth > 0) {
-            // Внутри вложенного if — просто добавляем
+            // Внутри вложенного блока — собираем токены и обновляем глубину
             if (!currentElseIf && !inElseBranch) {
                 bodyTokens.push(token);
             } else if (currentElseIf) {
                 currentElseIf.tokens.push(token);
             } else if (inElseBranch) {
                 elseTokens.push(token);
+            }
+            // Уменьшаем глубину для закрывающих тегов
+            if (token.type === 'endif') {
+                depth--;
+            }
+            if (token.type === 'endfor' || token.type === 'endforeach') {
+                depth--;
             }
             i++;
             continue;
