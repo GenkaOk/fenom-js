@@ -167,6 +167,27 @@ export async function compileAST(
                 break;
             }
 
+            case 'switch': {
+                const rawValue = node.value.startsWith('$') ? node.value.slice(1) : node.value;
+                const value = getFromContext(rawValue, context) ?? rawValue;
+                let matched = false;
+                for (const c of node.cases) {
+                    // Case values can be strings like "a" or variables
+                    const caseValue = c.value.startsWith('$') 
+                        ? getFromContext(c.value.slice(1), context) 
+                        : c.value.replace(/^["']|["']$/g, '');
+                    if (caseValue === value) {
+                        result += await compileAST(c.body, loader, context, filters);
+                        matched = true;
+                        break;
+                    }
+                }
+                if (!matched && node.defaultBody) {
+                    result += await compileAST(node.defaultBody, loader, context, filters);
+                }
+                break;
+            }
+
             case 'operator': {
                 const { variable, operator, value } = node;
                 const varName = variable.startsWith('$') ? variable.slice(1) : variable;
