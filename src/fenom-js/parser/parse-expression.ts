@@ -2,13 +2,13 @@ import type { ExpressionNode, BinaryOperator } from './../types/expression';
 
 function tokenizeExpression(expr: string): Array<{ type: 'op' | 'var' | 'num' | 'str' | 'filter', value: string; }> {
     const tokens: Array<{ type: 'op' | 'var' | 'num' | 'str' | 'filter', value: string; }> = [];
-    const re = /(\s+|[$a-zA-Z_]\w*(?:\.\w+)*|"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|\d+(?:\.\d+)?|[-+*/%<>=!&|?:(){}[\]~]+|[\w-]+:)/g;
+    const re = /(\s+|[$a-zA-Z_]\w*(?:\.\w+)*|"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|\d+(?:\.\d+)?|[-+*/%=<>!&|?:(){}[\]~]+|[\w-]+:)/g;
     let match;
 
     const isOperator = (val: string): val is BinaryOperator => {
         return [
             '+', '-', '*', '/', '%',
-            '==', '!=', '<', '<=', '>', '>=',
+            '==', '!=', '!==', '<', '<=', '>', '>=',
             '&&', '||', '!', '(', ')', '?', ':',
             '~'  // ← добавили
         ].includes(val);
@@ -59,7 +59,7 @@ export function parseExpression(expr: string): ExpressionNode {
     }
 
     function parseEquality(): ExpressionNode {
-        return parseBinary(() => parseRelational(), ['==', '!=']);
+        return parseBinary(() => parseRelational(), ['==', '!=', '!==']);
     }
 
     function parseRelational(): ExpressionNode {

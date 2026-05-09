@@ -35,6 +35,7 @@ export function evaluate(
                 case '%': return left % right;
                 case '==': return left == right;
                 case '!=': return left != right;
+                case '!==': return left !== right;
                 case '<': return left < right;
                 case '<=': return left <= right;
                 case '>': return left > right;
