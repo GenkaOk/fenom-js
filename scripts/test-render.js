@@ -13,7 +13,7 @@ async function run() {
         const data = JSON.parse(rawData);
         
         // Читаем шаблон
-        const templatePath = resolve('./src/demo/pages/test.tpl');
+        const templatePath = resolve('./src/demo/pages/index.tpl');
         const template = await readFile(templatePath, 'utf-8');
         // console.log('📄 Шаблон загружен:', template); // ← добавь это
 
