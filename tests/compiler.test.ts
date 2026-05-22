@@ -160,15 +160,13 @@ describe('Compiler - Set and operators', () => {
 });
 
 describe('Compiler - Switch', () => {
-    it('should render switch with case (via compileNode)', async () => {
-        // Note: switch is only handled in compile-node.ts, not compile-ast.ts
-        // This test documents current behavior
-        const result = await FenomJs('{switch $type}{case "a"}A{case "b"}B{default}Other{/switch}', {
-            context: { type: 'b' }
+    it('should render switch with case', async () => {
+            // Switch is now implemented in compile-ast.ts
+            const result = await FenomJs('{switch $type}{case "a"}A{case "b"}B{default}Other{/switch}', {
+                context: { type: 'b' }
+            });
+            expect(result).toBe('B');
         });
-        // Switch outputs nothing in compile-ast (goes to default case in compiler)
-        expect(result).toBe('');
-    });
 });
 
 describe('Compiler - Comments and ignore', () => {

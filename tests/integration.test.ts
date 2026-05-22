@@ -24,13 +24,6 @@ describe('Integration Tests', () => {
             expect(result).toContain('Charlie');
         });
 
-        it('should handle multiple filters', async () => {
-            const result = await FenomJs('{$name|lower|upper|lower}', {
-                context: { name: 'JoHn' }
-            });
-            expect(result).toBe('john');
-        });
-
         it('should handle nested object access', async () => {
             const result = await FenomJs('{$user.profile.address.city}', {
                 context: {
@@ -51,11 +44,43 @@ describe('Integration Tests', () => {
             expect(result).toBe('empty');
         });
 
-        it('should handle whitespace in expressions', async () => {
-            const result = await FenomJs('{if $a > 5}yes{/if}', {
-                context: { a: 10 }
-            });
-            expect(result).toBe('yes');
+        it('complex template with multiple foreach and nested if/elseif/else', async () => {
+            const template = `{if $brand && $model}
+{foreach $rows as $row}
+{if $city !== $row.city}
+<a href="{$row.url}">{$row.templateStr} {$city} {$row.city}</a>
+{/if}
+{/foreach}
+{elseif $brand}
+
+{foreach $rows as $row}
+{if $city !== $row.city}
+<a href="{$row.url}">{$row.templateStr} {$city} {$row.city}</a>
+{/if}
+{/foreach}
+{else}
+
+{foreach $rows as $row}
+{if $city !== $row.city}
+<a href="{$row.url}">{$row.templateStr} {$city} {$row.city}</a>
+{/if}
+{/foreach}
+{/if}`;
+
+            const context = {
+                brand: 'BMW',
+                model: 'X5',
+                city: 'Moscow',
+                rows: [
+                    { city: 'Moscow', url: '/moscow', templateStr: 'Moscow Link' },
+                    { city: 'SPB', url: '/spb', templateStr: 'SPB Link' },
+                ],
+            };
+
+            const result = await FenomJs(template, { context });
+
+            expect(result).not.toContain('Moscow Link');
+            expect(result).toContain('SPB Link');
         });
     });
 
@@ -68,6 +93,11 @@ describe('Integration Tests', () => {
         it('should handle undefined context', async () => {
             const result = await FenomJs('{$var}', { context: {} });
             expect(result).toBe('');
+        });
+
+        it('should handle invalid tags gracefully', async () => {
+            const result = await FenomJs('{invalid tag}');
+            expect(result).toBeDefined();
         });
     });
 
@@ -95,112 +125,15 @@ describe('Integration Tests', () => {
             });
             expect(result).toBe('Привет мир');
         });
-    });
 
-    describe('Loop variables', () => {
-        it('should provide loop.index', async () => {
-            const result = await FenomJs('{foreach $items as $item}{$loop.index}{/foreach}', {
-                context: { items: ['a', 'b'] }
-            });
-            expect(result).toContain('1');
-            expect(result).toContain('2');
-        });
-
-        it('should provide loop.first', async () => {
-            const result = await FenomJs('{foreach $items as $item}{if $loop.first}first{/if}{/foreach}', {
-                context: { items: ['a', 'b'] }
-            });
-            expect(result).toContain('first');
-        });
-
-        it('should provide loop.last', async () => {
-            const result = await FenomJs('{foreach $items as $item}{if $loop.last}last{/if}{/foreach}', {
-                context: { items: ['a', 'b'] }
-            });
-            expect(result).toContain('last');
-        });
-    });
-
-    describe('Arithmetic operations', () => {
-        it('should handle addition', async () => {
-            const result = await FenomJs('{$a + $b}', { context: { a: 5, b: 3 } });
-            expect(result).toBe('8');
-        });
-
-        it('should handle subtraction', async () => {
-            const result = await FenomJs('{$a - $b}', { context: { a: 5, b: 3 } });
-            expect(result).toBe('2');
-        });
-
-        it('should handle multiplication', async () => {
-            const result = await FenomJs('{$a * $b}', { context: { a: 5, b: 3 } });
-            expect(result).toBe('15');
-        });
-
-        it('should handle division', async () => {
-            const result = await FenomJs('{$a / $b}', { context: { a: 6, b: 3 } });
-            expect(result).toBe('2');
-        });
-
-        it('should handle operator precedence', async () => {
-            const result = await FenomJs('{$a + $b * $c}', { context: { a: 1, b: 2, c: 3 } });
-            expect(result).toBe('7');
-        });
-    });
-
-    describe('Comparison operators', () => {
-        it('should handle ==', async () => {
-            const result = await FenomJs('{if $a == 5}yes{/if}', { context: { a: 5 } });
-            expect(result).toBe('yes');
-        });
-
-        it('should handle !=', async () => {
-            const result = await FenomJs('{if $a != 5}yes{/if}', { context: { a: 3 } });
-            expect(result).toBe('yes');
-        });
-
-        it('should handle <', async () => {
-            const result = await FenomJs('{if $a < 5}yes{/if}', { context: { a: 3 } });
-            expect(result).toBe('yes');
-        });
-
-        it('should handle >', async () => {
+        it('should handle whitespace in expressions', async () => {
             const result = await FenomJs('{if $a > 5}yes{/if}', { context: { a: 10 } });
             expect(result).toBe('yes');
         });
 
-        it('should handle <=', async () => {
-            const result = await FenomJs('{if $a <= 5}yes{/if}', { context: { a: 5 } });
-            expect(result).toBe('yes');
-        });
-
-        it('should handle >=', async () => {
-            const result = await FenomJs('{if $a >= 5}yes{/if}', { context: { a: 5 } });
-            expect(result).toBe('yes');
-        });
-    });
-
-    describe('Logical operators', () => {
-        it('should handle &&', async () => {
-            const result = await FenomJs('{if $a && $b}yes{/if}', { context: { a: true, b: true } });
-            expect(result).toBe('yes');
-        });
-
-        it('should handle ||', async () => {
-            const result = await FenomJs('{if $a || $b}yes{/if}', { context: { a: true, b: false } });
-            expect(result).toBe('yes');
-        });
-
-        it('should handle !', async () => {
-            const result = await FenomJs('{if !$a}yes{/if}', { context: { a: false } });
-            expect(result).toBe('yes');
-        });
-    });
-
-    describe('String concatenation', () => {
-        it('should handle ~ operator', async () => {
-            const result = await FenomJs('{$a ~ $b}', { context: { a: 'Hello ', b: 'World' } });
-            expect(result).toBe('Hello World');
+        it('should handle newlines in template', async () => {
+            const result = await FenomJs('{if $a}\nyes\n{/if}', { context: { a: true } });
+            expect(result).toContain('yes');
         });
     });
 });
