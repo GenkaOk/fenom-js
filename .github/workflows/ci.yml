@@ -26,8 +26,8 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
-      - run: pnpm 'build: all'
+      - run: pnpm "build: all"
 
-      - run: pnpm 'build: copy-metafiles'
+      - run: pnpm "build: copy-metafiles"
 
       - run: pnpm test
