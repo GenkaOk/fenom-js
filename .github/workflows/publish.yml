@@ -35,9 +35,11 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
-      - run: pnpm "build: all"
+      - run: |
+          pnpm "build: all"
 
-      - run: pnpm "build: copy-metafiles"
+      - run: |
+          pnpm "build: copy-metafiles"
 
       - name: Publish fenom-js
         if: ${{ github.event_name == 'release' || github.event.inputs.package == 'fenom-js' || github.event.inputs.package == 'both' }}
