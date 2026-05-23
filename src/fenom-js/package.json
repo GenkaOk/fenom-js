@@ -1,6 +1,6 @@
 {
     "name": "@genkaok/fenom-js",
-    "version": "1.0.13",
+    "version": "2026.05",
     "description": "Simple and fast template engine",
     "author": "@Alekseevich-psk",
     "main": "./index.cjs",
@@ -23,10 +23,10 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/Alekseevich-psk/fenom-js.git"
+        "url": "git+https://github.com/GenkaOk/fenom-js.git"
     },
     "bugs": {
-        "url": "https://github.com/Alekseevich-psk/fenom-js/issues"
+        "url": "https://github.com/GenkaOk/fenom-js/issues"
     },
     "keywords": [
         "template",

@@ -1,86 +1,99 @@
-# ⚙️ fenom-js
+# fenom-js
 
-JavaScript-шаблонизатор, разрабатывался как максимально близкий аналог шаблонизатора [Fenom для PHP](https://github.com/fenom-template/fenom), используемого в CMS **MODX Revolution**, чтобы верстальщики и разработчики могли работать локально без запуска сервера.
+[![CI](https://github.com/GenkaOk/fenom-js/actions/workflows/ci.yml/badge.svg)](https://github.com/GenkaOk/fenom-js/actions/workflows/ci.yml)
 
-🔧 **Асинхронный**, **без зависимости от сборщиков**, работает **в браузере** и **локально** — идеален для верстки и прототипирования.
+JavaScript-шаблонизатор — аналог [Fenom для PHP](https://github.com/fenom-template/fenom), используемого в CMS **MODX Revolution**. Позволяет верстальщикам работать локально без запуска сервера.
 
-📌 В **бета-версии**. Пригоден для тестирования и локального использования.
-
----
-
-## 💬 Особенности
-
-- Синтаксис, близкий к `fenom.php` (MODX Revo)
-- Поддерживает:
--   - Переменные: **{$var}**
--   - Условия: **{if}**
--   - Поддержка: **==, !=, >, <, >=, <=, ===, !==, !, &&, ||, in** (для массивов).
--   - Тернарные и логические операторы: **{$age >= 18 ? 'Да' : 'Нет'}**
--   - Циклы **{foreach}** + Поддержка вложенных циклов.
--   - Фильтры: Применяются через **|** (как в оригинальном Fenom):
--   - Исключение: **{ignore}**
--   - Комментарии: **{ _ комментарий _ }**
-- Работает **в браузере** и **в Node.js**
-- В браузере: **без `include` и `extends`** (ограничение среды)
-- Легко внедряется в HTML-страницы для локальной верстки
+**Асинхронный**, **без зависимости от сборщиков**, работает **в браузере** и **в Node.js**.
 
 ---
 
-## 🖥️ Установка
+## Возможности
+
+- Переменные: `{$var}`
+- Условия: `{if}`, `{elseif}`, `{else}`
+- Операторы: `==`, `!=`, `!==`, `>`, `<`, `>=`, `<=`, `===`, `!`, `&&`, `||`, `in`
+- Тернарный оператор: `{$age >= 18 ? 'Да' : 'Нет'}`
+- Циклы: `{foreach}` с вложенностью, синтаксис `$key => $item`, `{foreachelse}`
+- `{switch}` / `{case}` / `{default}`
+- `{set $var = value}`, `{$var++}`, `{$var--}`, `{$var += N}`
+- Фильтры через `|`: `{$name|upper}`, `{$date|date:"Y-m-d"}`, `{$var|default:"...")}`
+- Комментарии: `{* текст *}`
+- Исключение блоков: `{ignore}...{/ignore}`
+- Наследование шаблонов: `{extends}`, `{block}`
+- Работает в браузере и Node.js
+- В браузере: без `{include}` и `{extends}` (ограничение среды)
+
+---
+
+## Установка
 
 ```bash
-npm install fenom-js
+npm install @genkaok/fenom-js
 ```
 
-## 🖥️Пример использования
+### Vite-плагин
 
-### В шаблонах .tpl
+```bash
+npm install @genkaok/vite-plugin-fenom --save-dev
+```
+
+---
+
+## Использование
+
+### В браузере
+
+```javascript
+import { FenomJs } from "@genkaok/fenom-js";
+
+const html = await FenomJs(templateHTML, {
+    context: { name: "Анна", isAdmin: true },
+});
+```
+
+### В Node.js
+
+```javascript
+import { FenomJs } from "@genkaok/fenom-js/node";
+
+const html = await FenomJs(template, {
+    context: { name: "Анна" },
+    loader: async (path) => fs.readFile(path, "utf-8"),
+});
+```
+
+### Шаблон .tpl
 
 ```html
 <body>
     <h1>Привет, {$name}!</h1>
     {if $isAdmin}
-    <p>Вы — администратор.</p>
+    <p>Вы администратор.</p>
     {/if}
+
+    {foreach $items as $item}
+    <li>{$item|upper}</li>
+    {foreachelse}
+    <li>Нет элементов</li>
+    {/foreach}
+
+    {switch $role}
+    {case "admin"}Админ{/case}
+    {case "user"}Пользователь{/case}
+    {default}Гость{/default}
+    {/switch}
 </body>
 ```
 
-### Js context (В браузере)
+---
 
-```javascript
-import { FenomJs } from "fenom-js";
-
-// Получаем HTML шаблона
-const templateHTML = document.body.innerHTML;
-
-// Данные
-const data = {
-    name: "Анна",
-    isAdmin: true,
-};
-
-// Рендерим
-const html = await FenomJs(templateHTML, {
-    context: data,
-});
-
-// Вставляем обратно
-document.body.innerHTML = html;
-```
-
-## 🧩 vite-plugin-fenom
-
-📌 Это отдельный пакет, для работы с **vite**
-
-```bash
-npm install vite-plugin-fenom --save-dev
-```
-
-## ⚙️ Конфигурация (vite.config.ts или vite.config.js)
+## vite-plugin-fenom
 
 ```ts
+// vite.config.ts
 import { defineConfig } from "vite";
-import fenom from "vite-plugin-fenom";
+import fenom from "@genkaok/vite-plugin-fenom";
 
 export default defineConfig({
     plugins: [
@@ -90,41 +103,35 @@ export default defineConfig({
             root: "src/",
         }),
     ],
-    build: {
-        outDir: "dist",
-        emptyOutDir: true,
-        rollupOptions: {
-            input: ["src/scripts/main.ts", "src/styles/style.css"],
-        },
-    },
 });
 ```
 
-### 🗂️ Структура проекта (пример)
+### Структура проекта
 
 ```
-src/demo/
+src/
 ├── data/
-│   ├── site.json          // Глобальные переменные: {$site.title}
+│   ├── site.json           // {$site.title}
 │   └── pages/
-│       ├── index.json     // Контекст для index.tpl
-│       └── catalog.json   // Контекст для catalog.tpl
+│       └── index.json      // контекст для index.tpl
 ├── pages/
-│   ├── index.tpl
-│   └── catalog.tpl
+│   └── index.tpl
 ├── blocks/
-│   └── header.tpl         // Может использоваться через {include 'blocks/header.tpl'}
+│   └── header.tpl
 └── layouts/
-    └── main.tpl           // Шаблон через {extends 'layouts/main.tpl'}
+    └── main.tpl            // {extends 'layouts/main.tpl'}
 ```
 
-## Статус
+---
 
-🟡 Бета-версия — API может меняться.
-Приветствуются предложения, PR!
+## Разработка
 
-[Сообщить об ошибке](https://github.com/Alekseevich-psk/fenom-js/issues)
+```bash
+pnpm install
+pnpm build:all
+pnpm test
+```
 
-## Ссылки
+---
 
-[🐱 GitHub](https://github.com/Alekseevich-psk/fenom-js)
+[Сообщить об ошибке](https://github.com/GenkaOk/fenom-js/issues)

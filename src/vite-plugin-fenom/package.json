@@ -1,6 +1,6 @@
 {
     "name": "@genkaok/vite-plugin-fenom",
-    "version": "1.0.13",
+    "version": "2026.05",
     "type": "module",
     "main": "./vite-plugin-fenom.cjs",
     "exports": {
