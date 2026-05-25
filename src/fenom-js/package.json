@@ -1,6 +1,6 @@
 {
     "name": "@genkaok/fenom-js",
-    "version": "2026.05",
+    "version": "2026.5.0",
     "description": "Simple and fast template engine",
     "author": "@Alekseevich-psk",
     "main": "./index.cjs",
