@@ -19,6 +19,15 @@ describe('Parser', () => {
             expect(ast[0].elseBody).toHaveLength(1);
         });
 
+        it('should parse multiple elseif branches separately', () => {
+            const tokens = tokenize('{if $a}A{elseif $b}B{elseif $c}C{elseif $d}D{else}E{/if}');
+            const ast = parse(tokens);
+            expect(ast[0].elseIfs).toHaveLength(3);
+            expect(ast[0].elseIfs[0].condition).toBe('$b');
+            expect(ast[0].elseIfs[1].condition).toBe('$c');
+            expect(ast[0].elseIfs[2].condition).toBe('$d');
+        });
+
         it('should parse nested if', () => {
             const tokens = tokenize('{if $a}{if $b}yes{/if}{/if}');
             const ast = parse(tokens);

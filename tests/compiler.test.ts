@@ -69,6 +69,14 @@ describe('Compiler - If statements', () => {
         expect(result).toBe('B');
     });
 
+    it('should render a chain of multiple elseifs', async () => {
+        const tpl = '{if $a}A{elseif $b}B{elseif $c}C{elseif $d}D{else}E{/if}';
+        expect(await FenomJs(tpl, { context: { a: false, b: false, c: false, d: true } })).toBe('D');
+        expect(await FenomJs(tpl, { context: { a: false, b: false, c: true, d: false } })).toBe('C');
+        expect(await FenomJs(tpl, { context: { a: true } })).toBe('A');
+        expect(await FenomJs(tpl, { context: {} })).toBe('E');
+    });
+
     it('should render else', async () => {
         const result = await FenomJs('{if $a}A{else}B{/if}', {
             context: { a: false }

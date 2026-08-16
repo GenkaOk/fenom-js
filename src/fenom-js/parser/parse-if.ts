@@ -56,16 +56,14 @@ export function parseIf(tokens: Token[], index: number): { node: any; nextIndex:
 
         // Обработка веток
         if (token.type === 'elseif') {
-            if (!currentElseIf && !inElseBranch) {
+            if (inElseBranch) {
+                elseTokens.push(token);
+            } else {
                 currentElseIf = {
                     condition: token.condition,
                     tokens: []
                 };
                 elseIfs.push(currentElseIf);
-            } else if (currentElseIf) {
-                currentElseIf.tokens.push(token);
-            } else if (inElseBranch) {
-                elseTokens.push(token);
             }
             i++;
             continue;
